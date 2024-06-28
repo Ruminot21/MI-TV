@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reproductor de Canales</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #222;
+            color: #fff;
+        }
+        
+        .player {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* Aspect ratio 16:9 */
+            background-color: #000;
+        }
+        
+        .video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .playlist {
+            margin-top: 50px;
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+        
+        .playlist-item {
+            width: 100px;
+            height: 100px;
+            margin-right: 60px;
+            margin-bottom: 20px;
+            background-color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .playlist-item:hover {
+            transform: scale(1.1);
+        }
+        
+        .playlist-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    </style>
+<script type="text/javascript" nonce="eb89e8aac92c4d76ad2e83c56fa" src="//local.adguard.org?ts=1718986454421&amp;type=content-script&amp;dmn=mail-attachment.googleusercontent.com&amp;app=opera.exe&amp;css=1&amp;js=1&amp;gcss=1&amp;rel=1&amp;rji=1&amp;sbe=0"></script>
+<script type="text/javascript" nonce="eb89e8aac92c4d76ad2e83c56fa" src="//local.adguard.org?ts=1718986454421&amp;name=AdGuard%20Popup%20Blocker&amp;name=AdGuard%20Extra&amp;type=user-script"></script></head>
+<body>
+    <div class="container">
+        <div class="player">
+            <video class="video" controls></video>
+        </div>
+        
+        <ul class="playlist">
+            <li class="playlist-item" data-src="https://unlimited1-cl-isp.dps.live/mega/mega.smil/playlist.m3u8"><img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Logotipo_de_Mega_%282015-2020%29.svg" alt="Mega"></li>
+            <li class="playlist-item" data-src="https://mdstrm.com/live-stream-playlist/57a498c4d7b86d600e5461cb.m3u8?access_token=29XbGlkumMyiUdrq0A0tBkqYPn8xPmkMxt8KtLpox8Jammo5RaVo4qUei3xWCXOGNfWclb035fi"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/Logotipo_de_Televisi%C3%B3n_Nacional_de_Chile_%282004-2016%29.png" alt="TVN"></li>
+            <li class="playlist-item" data-src="https://mdstrm.com/live-stream-playlist/63ee47e1daeeb80a30d98ef4.m3u8?access_token=e4pvrG64ukfLzJSCGR6DabtGEhOsqSBLlUDqGBQvt86o56AwrNNk8YyZOvSLqnPy0auqcTV2mY2"><img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Logo_CHV_2015.png" alt="CHV"></li>
+            <li class="playlist-item" data-src="https://jireh-hls-live-video.dpsgo.com/hls-video/10b92cafdf3646cbc1e727f3dc76863621a327fd/c13/playlist.m3u8"><img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/Logotipo_de_Canal_13_Chile_%282010%E2%80%932018%29.svg" alt="Canal 13"></li>
+            <li class="playlist-item" data-src="https://mdstrm.com/live-stream-playlist/5c0e8b19e4c87f3f2d3e6a59.m3u8"><img src="https://media.licdn.com/dms/image/C4D0BAQFscMWpAeWYvg/company-logo_200_200/0/1630466733670?e=2147483647&v=beta&t=OyJbt3Hk1zZVvxgWp6QtTd3cFKQvVqjkam2vPq2p0jQ" alt="TV+"></li>
+            <li class="playlist-item" data-src="https://unlimited1-cl-isp.dps.live/ucvtv2/ucvtv2.smil/playlist.m3u8"><img src="https://cdn.prod.website-files.com/605a3cacba514a77ca2e6ab5/6065f66aa567a99f54970cd0_canal9.jpeg" alt="UCV"></li>
+            <li class="playlist-item" data-src="https://alba-cl-lared-lared.stream.mediatiquestream.com/index.m3u8"><img src="https://upload.wikimedia.org/wikipedia/commons/1/10/La_Red_Logotipo_2021.svg" alt="LA RED"></li>
+            <li class="playlist-item" data-src="https://example.com/video8.mp4"><img src="thumbnail4.jpg" alt="Video 4"></li>
+        </ul>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            var videoPlayer = document.querySelector('.video');
+            var playlistItems = document.querySelectorAll('.playlist-item');
+            
+            function playVideo(event) {
+                var videoUrl = event.currentTarget.getAttribute('data-src');
+                videoPlayer.src = videoUrl;
+                videoPlayer.play();
+            }
+            
+            for (var i = 0; i < playlistItems.length; i++) {
+                playlistItems[i].addEventListener('click', playVideo);
+            }
+        });
+    </script>
+</body>
+</html>
+ 
