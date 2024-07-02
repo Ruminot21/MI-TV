@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de TV</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            width: 768px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .player {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            background-color: #000;
+        }
+
+        .video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .controls {
+            display: none; /* Ocultar controles */
+        }
+
+        .bubble {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .bubble::after {
+            content: '👆';
+        }
+
+        .playlist-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow-y: auto;
+            padding: 20px;
+            display: none;
+            flex-direction: column;
+        }
+
+        .playlist-container.active {
+            display: flex;
+        }
+
+        .search-bar {
+            padding: 10px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .playlist {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .playlist-item:hover {
+            transform: scale(1.05);
+        }
+
+        .playlist-item img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .fullscreen {
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="player" id="player">
+            <video class="video" id="videoPlayer" controls></video>
+            <div class="bubble" id="bubble"></div>
+            <div class="playlist-container" id="playlistContainer">
+                <input type="text" class="search-bar" id="searchBar" placeholder="Buscar...">
+                <ul class="playlist" id="playlist">
+                    <li class="playlist-item" data-src="https://unlimited1-cl-isp.dps.live/mega/mega.smil/playlist.m3u8">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Logotipo_de_Mega_%282015-2020%29.svg" alt="Mega">
+                        <span>Mega</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://mdstrm.com/live-stream-playlist/57a498c4d7b86d600e5461cb.m3u8?access_token=29XbGlkumMyiUdrq0A0tBkqYPn8xPmkMxt8KtLpox8Jammo5RaVo4qUei3xWCXOGNfWclb035fi">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/Logotipo_de_Televisi%C3%B3n_Nacional_de_Chile_%282004-2016%29.png" alt="tvn">
+                        <span>TVN</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://mdstrm.com/live-stream-playlist/63ee47e1daeeb80a30d98ef4.m3u8?access_token=4ZRG7DPdJSD9ruhje0xshiRQfvViU4Ct8sxSgwoy3PNdz7v2x76IyXjoUpFqfO4mxRpU0EMUaRu">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/ef/Logo_CHV_2015.png" alt="CHV">
+                        <span>CHV</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://jireh-hls-live-video.dpsgo.com/hls-video/10b92cafdf3646cbc1e727f3dc76863621a327fd/c13/playlist.m3u8">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/Logotipo_de_Canal_13_Chile_%282010%E2%80%932018%29.svg" alt="CANAL 13">
+                        <span>CANAL 13</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://mdstrm.com/live-stream-playlist/5c0e8b19e4c87f3f2d3e6a59.m3u8">
+                        <img src="https://media.licdn.com/dms/image/C4D0BAQFscMWpAeWYvg/company-logo_200_200/0/1630466733670?e=2147483647&v=beta&t=OyJbt3Hk1zZVvxgWp6QtTd3cFKQvVqjkam2vPq2p0jQ" alt="TV +">
+                        <span>TV +</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://unlimited1-cl-isp.dps.live/ucvtv2/ucvtv2.smil/playlist.m3u8">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/UCV_%28but%2C_better_quality%29.png" alt="ucv tv">
+                        <span>UCV TV</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://alba-cl-lared-lared.stream.mediatiquestream.com/index.m3u8">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/1/10/La_Red_Logotipo_2021.svg" alt="la red">
+                        <span>LA RED</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://redirector.rudo.video/hls-video/339f69c6122f6d8f4574732c235f09b7683e31a5/wapptv/wapptv.smil/.m3u8">
+                        <img src="https://pbs.twimg.com/profile_images/1415051566546104320/n4HbNr3j_400x400.jpg" alt="wapp tv">
+                        <span>WAPP TV</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://mdstrm.com/live-stream-playlist/5c0e8b19e4c87f3f2d3e6a59.m3u8">
+                        <img src="https://media.licdn.com/dms/image/C4D0BAQFscMWpAeWYvg/company-logo_200_200/0/1630466733670?e=2147483647&v=beta&t=OyJbt3Hk1zZVvxgWp6QtTd3cFKQvVqjkam2vPq2p0jQ" alt="TV +">
+                        <span>TV +</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://unlimited1-us.dps.live/c9/c9.smil/playlist.m3u8">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Canal_9_B%C3%ADo_B%C3%ADo_Televisi%C3%B3n_-_2012_logo.png/640px-Canal_9_B%C3%ADo_B%C3%ADo_Televisi%C3%B3n_-_2012_logo.png" alt="canal 9">
+                        <span>CANAL 9</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://538d0bde28ccf.streamlock.net/live-cont.ar/pakapaka/.m3u8">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Paka-paka.svg/1200px-Paka-paka.svg.png" alt="Paka paka">
+                        <span>PAKA PAKA</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://5d00db0e0fcd5.streamlock.net/7062/7062/.m3u8">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbFpbKi0GqYmlqhaMV1Fc7Jqb3OoDYYM6KMg&s" alt="CINERAMA">
+                        <span>CINERAMA</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://s2.tvdatta.com:3307/live/fmtvmatrizlive.m3u8">
+                        <img src="https://www.vivalivetv.com/public/files/shows/0/1/1125-640x360-FFFFFF.jpg" alt="FM TV">
+                        <span>FM TV</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://byecableiptvnew3.ddns.net/ENVIVOCINEMA/index.m3u8">
+                        <img src="https://www.televisiongratis.tv/components/com_televisiongratis/images/cinema--en-vivo-1438.png" alt="CINEMA +">
+                        <span>CINEMA +</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://clbpktstvhls-1.clarovideo.com/bpk-tv/TNTSP2/hls_fk/index.m3u8">
+                        <img src="https://tntsports.cl/__export/1610632680933/sites/cdfchile/arte/apps/facebook_20210114.jpg" alt="TNT SPORT">
+                        <span>TNT SPORT</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://cfd-v4-service-channel-stitcher-use1-1.prd.pluto.tv/v2/stitch/hls/channel/63eb9255c111bc0008fe6ec4/master.m3u8?advertisingId=&appName=web&appVersion=9.2.1-a2d0960e98a7a0629d3d5bd4a920ac8e0913c96f&app_name=web&clientDeviceType=0&clientID=5d0a4553-2306-413f-bff8-41145941af9e&clientModelNumber=1.0.0&country=CL&deviceDNT=false&deviceId=5d0a4553-2306-413f-bff8-41145941af9e&deviceLat=-33.4400&deviceLon=-70.6500&deviceMake=chromium-webview&deviceModel=web&deviceType=web&deviceVersion=126.0.6478&marketingRegion=VE&serverSideAds=false&sessionID=592f9bb3-3876-11ef-9874-8eadd7eb757d&sid=592f9bb3-3876-11ef-9874-8eadd7eb757d&userId=&jwt=eyJhbGciOiJIUzI1NiIsImtpZCI6ImZjMTBiYTBmLTA2ZDMtNGY3OC05NDExLTk3YjkyMjMwODg2ZSIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSUQiOiI1OTJmOWJiMy0zODc2LTExZWYtOTg3NC04ZWFkZDdlYjc1N2QiLCJjbGllbnRJUCI6IjE5MS4xMjYuOTkuMTU3IiwiY2l0eSI6IlNhbnRpYWdvIiwicG9zdGFsQ29kZSI6IjgzMjAzMjAiLCJjb3VudHJ5IjoiQ0wiLCJkbWEiOjAsImFjdGl2ZVJlZ2lvbiI6IlZFIiwiZGV2aWNlTGF0IjotMzMuNDM5OTk4NjI2NzA4OTg0LCJkZXZpY2VMb24iOi03MC42NTAwMDE1MjU4Nzg5LCJwcmVmZXJyZWRMYW5ndWFnZSI6ImVzIiwiZGV2aWNlVHlwZSI6IndlYiIsImRldmljZVZlcnNpb24iOiIxMjYuMC42NDc4IiwiZGV2aWNlTWFrZSI6ImNocm9taXVtLXdlYnZpZXciLCJkZXZpY2VNb2RlbCI6IndlYiIsImFwcE5hbWUiOiJ3ZWIiLCJhcHBWZXJzaW9uIjoiOS4yLjEtYTJkMDk2MGU5OGE3YTA2MjlkM2Q1YmQ0YTkyMGFjOGUwOTEzYzk2ZiIsImNsaWVudElEIjoiNWQwYTQ1NTMtMjMwNi00MTNmLWJmZjgtNDExNDU5NDFhZjllIiwiY21BdWRpZW5jZUlEIjoiIiwiaXNDbGllbnRETlQiOmZhbHNlLCJ1c2VySUQiOiIiLCJsb2dMZXZlbCI6IkRFRkFVTFQiLCJ0aW1lWm9uZSI6IkFtZXJpY2EvU2FudGlhZ28iLCJzZXJ2ZXJTaWRlQWRzIjpmYWxzZSwiZTJlQmVhY29ucyI6ZmFsc2UsImZlYXR1cmVzIjp7Im11bHRpUG9kQWRzIjp7ImVuYWJsZWQiOnRydWV9fSwiZm1zUGFyYW1zIjp7ImZ3VmNJRDIiOiI1ZDBhNDU1My0yMzA2LTQxM2YtYmZmOC00MTE0NTk0MWFmOWUiLCJmd1ZjSUQyQ29wcGEiOiI1ZDBhNDU1My0yMzA2LTQxM2YtYmZmOC00MTE0NTk0MWFmOWUiLCJjdXN0b21QYXJhbXMiOnsiZm1zX2xpdmVyYW1wX2lkbCI6IiIsImZtc19lbWFpbGhhc2giOiIiLCJmbXNfc3Vic2NyaWJlcmlkIjoiIiwiZm1zX2lmYSI6IiIsImZtc19pZGZ2IjoiIiwiZm1zX3VzZXJpZCI6IjVkMGE0NTUzLTIzMDYtNDEzZi1iZmY4LTQxMTQ1OTQxYWY5ZSIsImZtc192Y2lkMnR5cGUiOiJ1c2VyaWQiLCJmbXNfcmFtcF9pZCI6IiIsImZtc19oaF9yYW1wX2lkIjoiIiwiZm1zX2JpZGlkdHlwZSI6IiIsIl9md18zUF9VSUQiOiIiLCJmbXNfcnVsZWlkIjoiMTAwMDAsMTAwMDksMTAwMDMifX0sImlzcyI6ImJvb3QucGx1dG8udHYiLCJzdWIiOiJwcmk6djE6cGx1dG86ZGV2aWNlczpWRTpOV1F3WVRRMU5UTXRNak13TmkwME1UTm1MV0ptWmpndE5ERXhORFU1TkRGaFpqbGwiLCJhdWQiOiIqLnBsdXRvLnR2IiwiZXhwIjoxNzIwMDEzMDQyLCJpYXQiOjE3MTk5MjY2NDIsImp0aSI6IjkwNTZmM2FjLWU5MTktNDk5Yi1iNDIzLTBmYzFkZmM5ODVmMSJ9.FS-Nx3uScsi9i24G2Kn1RYbz-rToSlCYJ12X-aS2AZE&masterJWTPassthrough=true&includeExtendedEvents=true&paln=AQzzBGQE31sS4IXlG33m6uK17VAIrEbChB_vIze7RFpyeQhUUQmGxF9nmSu6WLPOn0FA99CuDDZAgUBTyp3YmJf7OYcx4N2qDj0GQCKBAuyWqTdYxEWqyaFpx4UTTuJm4z4fAZBquJr4r3JMzpjzKEUUwwUimbchH6ez3adZKQaFjI-Zq4PHE_s5JKKONnY1nISCIL_pCmrdX5nxNFxL-ajlWXSH0CCpH6rWrTYHL0_6C4BoiH7xrvgRQLt0C4sLrtzYFYvUZrQfaOrjiQIRYeCiVvbPb1KW0W5-h6jk32c86sEDwJJMj7DrpDWQTQcGRAk6R7iqI47xXvDPTXqcKUYWejEwooKOqEUZj_J8XxE9DnWEbF1xyUC4ufKAgH1XbiknbTDkj8jR3DjB5rafjz0OJ0crWnpsV6h7OmH2geO8yM5sM4_ZaDVfcv-xa_E7ni2s2WauXEdz_6ms69uiCTGAJ8IpOQXZd-BkA3Nemz1MegRc1TW0uBccp8c2fKtNB9LyH92W5jjVoOIvtimQ_Yc3ZcVmNJ0oVOFwrRw0YWYGSXdqLNhOV4ZYm-Q97Fe2yfxM0pdzhN04DyoSow1gX8h_ViAqFnmAQReWDhN2-ci-0diArK3rf2b15Oz-_tB-nW99AD3Vchz6KULyX6blPqF9KDP9qMrd5gv6nQ4yRBw3T3Mf1RtXj8yHai_Gt7dF5SVwWXIzV7xgrwEtO7YzsyY7wI525IdE-FOupoh6RPxrTFnR-eEnDXGcABkF0QlNWtja64EjWIPqtovV1wkoSbw07g8kJH0QTKIezByMLPPhrpabr0ViHE-4sw9BTnAl91Z_B82tG1LC1gimTdVOU3GMJPTSCGo_dt4QgKfFnw8hAjmpa_O2fo3H5-_gCiVjqoUwRDk9Z5AVdgSeGyPo14OoLf04xalU-BDV7VniV635Arn1JFI6iwSnGq0U9tE6INLDImvKup3bchyfD6wC9h0daq-jVHrHVp1klocMdiO5ThcHSfAHozXkrWbxVEcAERnaBsXnqZoE2rlFA9GPbG_5oiTamRpypx1UWyfRqOsUhjbVyVhGPGHVlikxAVPJmUOIRf75dcRtXrP14PnR25EczmB7FlSB-jy_ClL71NRMUmTSwObPbDhlbz2dKCjHJEZWkrLYNsAAFuQVVCvtzHWfQL0DKOxLIFl9JfxjgBlxHNNuCMkUyRrYhO3ZoVXNWy7XGojEQ_nFc1NsQqnrSj8V6AHYSbM56xffQ7eh3EDhv587blQ7boR6QnkJh2J1mpjbSJwdCjVSeGhfLK326InJyXsR2e8tRME7m1fBgwrt32hnuea6scL0Yd-OmVuLpO6-&eventVOD=false&CMCD=mtp%3D500%2Cot%3Dm%2Csf%3Dh%2Csid%3D%228f9dc862-6a83-4d19-a8da-ed5b14534e31%22%2Csu">
+                        <img src="https://img3.hulu.com/user/v3/artwork/de70fc86-bb29-4f6f-9b7f-94357e71fd61?base_image_bucket_name=image_manager&base_image=3e1bf634-7d66-4d1c-959e-7a8bc5076b96&region=US&format=webp&size=952x536" alt="CSI:MIAMI">
+                        <span>CSI:MIAMI</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://cfd-v4-service-channel-stitcher-use1-1.prd.pluto.tv/v2/stitch/hls/channel/63eb947c4e83e70008ab877b/master.m3u8?advertisingId=&appName=web&appVersion=9.2.1-a2d0960e98a7a0629d3d5bd4a920ac8e0913c96f&app_name=web&clientDeviceType=0&clientID=5d0a4553-2306-413f-bff8-41145941af9e&clientModelNumber=1.0.0&country=CL&deviceDNT=false&deviceId=5d0a4553-2306-413f-bff8-41145941af9e&deviceLat=-33.4400&deviceLon=-70.6500&deviceMake=chromium-webview&deviceModel=web&deviceType=web&deviceVersion=126.0.6478&marketingRegion=VE&serverSideAds=false&sessionID=592f9bb3-3876-11ef-9874-8eadd7eb757d&sid=592f9bb3-3876-11ef-9874-8eadd7eb757d&userId=&jwt=eyJhbGciOiJIUzI1NiIsImtpZCI6ImZjMTBiYTBmLTA2ZDMtNGY3OC05NDExLTk3YjkyMjMwODg2ZSIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSUQiOiI1OTJmOWJiMy0zODc2LTExZWYtOTg3NC04ZWFkZDdlYjc1N2QiLCJjbGllbnRJUCI6IjE5MS4xMjYuOTkuMTU3IiwiY2l0eSI6IlNhbnRpYWdvIiwicG9zdGFsQ29kZSI6IjgzMjAzMjAiLCJjb3VudHJ5IjoiQ0wiLCJkbWEiOjAsImFjdGl2ZVJlZ2lvbiI6IlZFIiwiZGV2aWNlTGF0IjotMzMuNDM5OTk4NjI2NzA4OTg0LCJkZXZpY2VMb24iOi03MC42NTAwMDE1MjU4Nzg5LCJwcmVmZXJyZWRMYW5ndWFnZSI6ImVzIiwiZGV2aWNlVHlwZSI6IndlYiIsImRldmljZVZlcnNpb24iOiIxMjYuMC42NDc4IiwiZGV2aWNlTWFrZSI6ImNocm9taXVtLXdlYnZpZXciLCJkZXZpY2VNb2RlbCI6IndlYiIsImFwcE5hbWUiOiJ3ZWIiLCJhcHBWZXJzaW9uIjoiOS4yLjEtYTJkMDk2MGU5OGE3YTA2MjlkM2Q1YmQ0YTkyMGFjOGUwOTEzYzk2ZiIsImNsaWVudElEIjoiNWQwYTQ1NTMtMjMwNi00MTNmLWJmZjgtNDExNDU5NDFhZjllIiwiY21BdWRpZW5jZUlEIjoiIiwiaXNDbGllbnRETlQiOmZhbHNlLCJ1c2VySUQiOiIiLCJsb2dMZXZlbCI6IkRFRkFVTFQiLCJ0aW1lWm9uZSI6IkFtZXJpY2EvU2FudGlhZ28iLCJzZXJ2ZXJTaWRlQWRzIjpmYWxzZSwiZTJlQmVhY29ucyI6ZmFsc2UsImZlYXR1cmVzIjp7Im11bHRpUG9kQWRzIjp7ImVuYWJsZWQiOnRydWV9fSwiZm1zUGFyYW1zIjp7ImZ3VmNJRDIiOiI1ZDBhNDU1My0yMzA2LTQxM2YtYmZmOC00MTE0NTk0MWFmOWUiLCJmd1ZjSUQyQ29wcGEiOiI1ZDBhNDU1My0yMzA2LTQxM2YtYmZmOC00MTE0NTk0MWFmOWUiLCJjdXN0b21QYXJhbXMiOnsiZm1zX2xpdmVyYW1wX2lkbCI6IiIsImZtc19lbWFpbGhhc2giOiIiLCJmbXNfc3Vic2NyaWJlcmlkIjoiIiwiZm1zX2lmYSI6IiIsImZtc19pZGZ2IjoiIiwiZm1zX3VzZXJpZCI6IjVkMGE0NTUzLTIzMDYtNDEzZi1iZmY4LTQxMTQ1OTQxYWY5ZSIsImZtc192Y2lkMnR5cGUiOiJ1c2VyaWQiLCJmbXNfcmFtcF9pZCI6IiIsImZtc19oaF9yYW1wX2lkIjoiIiwiZm1zX2JpZGlkdHlwZSI6IiIsIl9md18zUF9VSUQiOiIiLCJmbXNfcnVsZWlkIjoiMTAwMDAsMTAwMDksMTAwMDMifX0sImlzcyI6ImJvb3QucGx1dG8udHYiLCJzdWIiOiJwcmk6djE6cGx1dG86ZGV2aWNlczpWRTpOV1F3WVRRMU5UTXRNak13TmkwME1UTm1MV0ptWmpndE5ERXhORFU1TkRGaFpqbGwiLCJhdWQiOiIqLnBsdXRvLnR2IiwiZXhwIjoxNzIwMDEzMDQyLCJpYXQiOjE3MTk5MjY2NDIsImp0aSI6IjkwNTZmM2FjLWU5MTktNDk5Yi1iNDIzLTBmYzFkZmM5ODVmMSJ9.FS-Nx3uScsi9i24G2Kn1RYbz-rToSlCYJ12X-aS2AZE&masterJWTPassthrough=true&includeExtendedEvents=true&paln=AQzzBGQEWC7CdP8EfbkKL95UnKnEWZXxiQ1Kf0f5-QJrhW1HX-txJx9ZUOfXnZ1gMa9HBp1UvpKdBFtUeqNs7RtKtvaYifLrjOW-A2VrE4UImfpV7AHkBSAS5g6MpQI2vWyDC9wblqiVVDq-7xK9WZF7XsQsf4B3-c5JUYfTr8P0TTkGR8H_BwRo3_2fOpCMrxWGApM7b-avCWeLr9PX1RUj67V4Ic99qp_ChQLg_U37zsMRtKQqWkuT-EVvqszmDx0xv6XfyhDfJ9eTRNKBtKMjMfJrUaJZM6xxW8xH8RepwV3NjX4sT5rZibeqI9UU86btFeESladb0aioOqp-bNRH7d4MlOYQH7Tt0ty3KmJCZrJa7mX9KIn7cfKa-n2NBFjdLMw4ipwlRwc7YPzPZV4a3Bwk0s7i5uWIoHewC0W4lYdPSJc160tjLYPah7DhPm_tdYWvZuJDF0HRzHBQ9hbdXb3knwG1La4eD3p36JS-HeenElX4Kkmd70jVOBbNnTgeGuvmHpAdb6aqWmlGKAX0Pq-ohaKI6G_v5Mlpt7xQr42w4rc_nKhEM4C3AWIgu7VlRHuYCDCgtCab5GpF6_RR2QdRgZE6vURwxPJw1gzEwmPbNttdYZ0JGCcpdMIDAg8dFZu9_bOVX-XHnQRkRPZq24VrH97SpI996Ihs5X2KDfeJaHIwHrkVnffv5YZVPK0VNxx5IUEVCZA6YFz8RSlr3d1obzjeVoEt_v16WSD8Efh1MjJ8QDQPBZWh8UjGwpUCLd3VWcc5FbOMI2E3BGigmFeSB4FN9CS6QB0OoMSGyRE5x2pE5TzGo6NZLJPlRkj1VD0IEl-JCOjqxnDR6zMUm3eFsLzPE_Wi2OS3_2zHsyuFgGbpo-2W9MIkg33lEY9ktrC30NmO2Ur9XZv-N-5zzF7bVBDyPngHbmo6ZJ4YXh-rF5kWFhCZZmCwj8SRyY1Sg8B90FdZUUUqTovSa4opstwXGpw0uv7tIlJSGgDbAVf8aRr3jaU_XCR0MH1jlDSJ-TSVuCuw48RufOdQNeoOkCk5t392Idg10N3Bv7itfh_eET6hJA1f4raILe95mPhre0u6XndQEXVICT1wjJclwQmGWfhuxJ6iMM6yKLR0BG5mGx3EpiFOm9E5c-C5aRkyrmZ_P2S0FBYhld-b-qY4jFFAbyoba0v8UA2AAAnMwlWJxS1dDB_1Rg1tZfsbqRKq8gMeUHszDDMnrw28bJfJAjfGjRK1GUBMDhIhKdt-VU5PAGEGsN3Vh76sf1-4VM-k_ROOGUGT7Kskeen6nC_QgjGVsVUtR0aNGyzHqBTX8Rws34TIRJVKkxT9kkyd8OsDc3bqWeNmvmsnAmXkz3PKJU23Flrhj80jB9XAwc-qv00XRdxGW-Tqy7ETtnd16eG5ZEtA7bd-5kiNb0M.&eventVOD=false&CMCD=mtp%3D500%2Cot%3Dm%2Csf%3Dh%2Csid%3D%227aa59987-3ae3-4ba9-bdff-712bbba3fc4c%22%2Csu">
+                        <img src="https://m.media-amazon.com/images/S/pv-target-images/1841022f0bc2d345ae870da1bb3bdc7834a5bae6b43941255c03f9a5964c7f2c.jpg" alt="NCIS">
+                        <span>NCIS</span>
+                        </li>
+                        <li class="playlist-item" data-src="https://cfd-v4-service-channel-stitcher-use1-1.prd.pluto.tv/v2/stitch/hls/channel/63eb95baa99571000898a078/3321280/playlist.m3u8?terminate=false&sid=c00d4513-3881-11ef-9a10-7ec43b05f635&deviceDNT=0&deviceLat=-33.380001068115234&deviceLon=-71.0999984741211&deviceModel=web&deviceVersion=126.0.6478&includeExtendedEvents=true&appName=web&deviceId=5d0a4553-2306-413f-bff8-41145941af9e&appVersion=9.2.1-a2d0960e98a7a0629d3d5bd4a920ac8e0913c96f&deviceType=web&deviceMake=chromium-webview&jwt=eyJhbGciOiJIUzI1NiIsImtpZCI6ImZjMTBiYTBmLTA2ZDMtNGY3OC05NDExLTk3YjkyMjMwODg2ZSIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uSUQiOiJjMDBkNDUxMy0zODgxLTExZWYtOWExMC03ZWM0M2IwNWY2MzUiLCJjbGllbnRJUCI6IjE4Ni4yMDkuMjA5LjE0IiwiY2l0eSI6IkN1cmFjYXZpIiwicG9zdGFsQ29kZSI6Ijk2MzAwMDAiLCJjb3VudHJ5IjoiQ0wiLCJkbWEiOjAsImFjdGl2ZVJlZ2lvbiI6IlZFIiwiZGV2aWNlTGF0IjotMzMuMzgwMDAxMDY4MTE1MjM0LCJkZXZpY2VMb24iOi03MS4wOTk5OTg0NzQxMjExLCJwcmVmZXJyZWRMYW5ndWFnZSI6ImVzIiwiZGV2aWNlVHlwZSI6IndlYiIsImRldmljZVZlcnNpb24iOiIxMjYuMC42NDc4IiwiZGV2aWNlTWFrZSI6ImNocm9taXVtLXdlYnZpZXciLCJkZXZpY2VNb2RlbCI6IndlYiIsImFwcE5hbWUiOiJ3ZWIiLCJhcHBWZXJzaW9uIjoiOS4yLjEtYTJkMDk2MGU5OGE3YTA2MjlkM2Q1YmQ0YTkyMGFjOGUwOTEzYzk2ZiIsImNsaWVudElEIjoiNWQwYTQ1NTMtMjMwNi00MTNmLWJmZjgtNDExNDU5NDFhZjllIiwiY21BdWRpZW5jZUlEIjoiIiwiaXNDbGllbnRETlQiOmZhbHNlLCJ1c2VySUQiOiIiLCJsb2dMZXZlbCI6IkRFRkFVTFQiLCJ0aW1lWm9uZSI6IkFtZXJpY2EvU2FudGlhZ28iLCJzZXJ2ZXJTaWRlQWRzIjpmYWxzZSwiZTJlQmVhY29ucyI6ZmFsc2UsImZlYXR1cmVzIjp7Im11bHRpUG9kQWRzIjp7ImVuYWJsZWQiOnRydWV9fSwiZm1zUGFyYW1zIjp7ImZ3VmNJRDIiOiI1ZDBhNDU1My0yMzA2LTQxM2YtYmZmOC00MTE0NTk0MWFmOWUiLCJmd1ZjSUQyQ29wcGEiOiI1ZDBhNDU1My0yMzA2LTQxM2YtYmZmOC00MTE0NTk0MWFmOWUiLCJjdXN0b21QYXJhbXMiOnsiZm1zX2xpdmVyYW1wX2lkbCI6IiIsImZtc19lbWFpbGhhc2giOiIiLCJmbXNfc3Vic2NyaWJlcmlkIjoiIiwiZm1zX2lmYSI6IiIsImZtc19pZGZ2IjoiIiwiZm1zX3VzZXJpZCI6IjVkMGE0NTUzLTIzMDYtNDEzZi1iZmY4LTQxMTQ1OTQxYWY5ZSIsImZtc192Y2lkMnR5cGUiOiJ1c2VyaWQiLCJmbXNfcmFtcF9pZCI6IiIsImZtc19oaF9yYW1wX2lkIjoiIiwiZm1zX2JpZGlkdHlwZSI6IiIsIl9md18zUF9VSUQiOiIiLCJmbXNfcnVsZWlkIjoiMTAwMDAsMTAwMDksMTAwMDMifX0sImlzcyI6ImJvb3QucGx1dG8udHYiLCJzdWIiOiJwcmk6djE6cGx1dG86ZGV2aWNlczpWRTpOV1F3WVRRMU5UTXRNak13TmkwME1UTm1MV0ptWmpndE5ERXhORFU1TkRGaFpqbGwiLCJhdWQiOiIqLnBsdXRvLnR2IiwiZXhwIjoxNzIwMDE3OTM5LCJpYXQiOjE3MTk5MzE1MzksImp0aSI6IjYxNTY1ZjVhLTY2MmQtNDMzMi04ZTExLTU1ZThmOWEzZDJmYSJ9.b-GledcFzmPc5O92kwcCUofrhoko_rvKbFzGaN2kSHw&paln=AQzzBGQEiCwCjB4hJhYaNdbo_Dg1pjvYHG01G7ravyH2pHUOMobmwg0yKXHS6DlHeL0NsKWhv8uWvTIR6gmtSI7wELMUF8WLimbZ6Yq1gN-aVue11GS7z_8XSFmYbUyWQZvW71XKz3gJEXj0WuC4PBGSlxQt-P7f1I5LEH46r2fiY06xFj8zcZIMVHtaauFRRh3drFuyFtmsOxa-QK3zTrRhBwnxzmL7xgUXGivDfI78m_2R3FQk6LC_PyRp594E0JGp9-ckV_l01iFlYZy7EV1wUZBD2iDXK1KiQkHeiKfJDMrRvslYDIKHm6Z_CS5XgiPhtqMx8tYYDDUGapUujI09kkrUVckWxiswm9F-g8-49BZNz-Eh0I2ryq7xj6c_BscilkJctBRqYnR28Af9g9yvlWbXmsgncXATy30GQ2t36S5h1wjFa7H7I30cheGAgrGUmv9NnOZhT-lpqZ9aIUqlVjiQEvradUJYOomz08rIBcBsNlauC-yXgyFSCDyjfkkvSHJYeJfRinHidYd8zbwRN9xLxnnShMDiVmMEXsTlvq_ZGQ0Jz2DJyXBpHL7xrjLin3OB_1MZVMJ_efod4TKJieiaayOdbyBdvNpqLQa9juJNZna2qhub2zxUmZMo7If3tw--e6_nL2tXO_KRZ_qCOxQU40F6WkkUzsT3G9unq24cT2HtzGHAJrGkp3flRioWue24xwaFMmyBRro71Ji1d7rUDdB0xDDtJC7X-2SZ7RYfysmVU0O1lnzVfbgtl8STsqH9gaYRFEpFF9s3TdV9DK6OnNzVgKriYuXabryhSh3BEq7OTnfWC3mqmh0QuVJ2EAfUeHO3ANWDIH0b_W49n296OL2IQSQnj7_XTn-qZf_tPUS_u5DUDwSwvnq_kSXlkf69MQ9GA-wi4hFUW4lvGgbAcDv6k35hwRjcF7jOsG6zz0CNS4tEZYpPUyJU8C82yyCSgZq1H7nfPPx2ytv-wj3-AdBNRllwetcBvzOlFtlonrJgwCfgD4jIDFv2XOKVS2m0qCvieTFtICXBAnc2HzO4oXHjlu_J5PX7_ZrLzg7hHRLro5xk9MD2nPxLKcdVjtoesfdjj9_EL6vToqVix8RV6-oYWEIV0B7o2xzG6uTuP2TLD1urDunAMxD3ILrG8pPbCsnZsEvrFuRC5fRJhS_H07ugrRZJhOw7SKpYDsGzulSIoSE4LkaJKtklJMklYhVfWpisV1dFx3O3frQ417hBBEak-Ptmag8ekdG_YWVUOKjfcDYkj6R5WB0QGFcFgf3By0NR3w4qYNrShRHhywd6IndM_FoB3Krz_Fopho6OkinzXWnEAhkbiZTUtFJ933yni0E3p1VcATw.&CMCD=mtp%3D5400%2Cot%3Dm%2Csf%3Dh%2Csid%3D%22a44e7f3e-9417-4c2f-a8dc-405f93614949%22">
+                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTpUXishiB47D7EQqSHJDoCieQdx-kV93dWdA&s" alt="Macgyver">
+                        <span>MACGYVER</span>
+                        </li>
+            
+                    </li>
+                    <!-- Añade más canales aquí -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoPlayer = document.getElementById('videoPlayer');
+            const playlistItems = document.querySelectorAll('.playlist-item');
+            const playlistContainer = document.getElementById('playlistContainer');
+            const searchBar = document.getElementById('searchBar');
+            const bubble = document.getElementById('bubble');
+            let currentChannelIndex = 0;
+
+            function playVideo(event) {
+                const videoUrl = event.currentTarget.getAttribute('data-src');
+                videoPlayer.src = videoUrl;
+                videoPlayer.play();
+                currentChannelIndex = Array.from(playlistItems).indexOf(event.currentTarget);
+            }
+
+            function filterChannels() {
+                const filter = searchBar.value.toLowerCase();
+                playlistItems.forEach((item) => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(filter) ? 'flex' : 'none';
+                });
+            }
+
+            function toggleFullscreen() {
+                if (!document.fullscreenElement) {
+                    videoPlayer.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            function togglePlaylist() {
+                playlistContainer.classList.toggle('active');
+            }
+
+            playlistItems.forEach((item) => {
+                item.addEventListener('click', playVideo);
+            });
+
+            searchBar.addEventListener('input', filterChannels);
+
+            bubble.addEventListener('click', togglePlaylist);
+
+            window.addEventListener('orientationchange', () => {
+                toggleFullscreen();
+            });
+        });
+    </script>
+</body>
+</html>
